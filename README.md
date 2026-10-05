@@ -44,14 +44,26 @@
 单个文件编译（VS Code 中按 `F5` 或 `Ctrl+Shift+B` 亦可）：
 
 ```bash
-gcc -Wall -std=c17 hello.c -o hello.exe
+# 根目录的hello.c 无需额外参数
+gcc -Wall -Wextra -std=c17 hello.c -o hello.exe
 ./hello.exe
+
+# grammar/ 下的文件自带头文件，直接编译
+gcc -Wall -Wextra -std=c17 grammar/02_control_flow.c -o flow.exe
+
+# demos/ 与 solutions/ 下的文件 #include "utf8_console.h"，
+# 该头文件在仓库根目录，必须用 -I. 指定头文件搜索路径
+gcc -Wall -Wextra -std=c17 -I. solutions/day07_comprehensive.c -o day07.exe
+./day07.exe
 ```
 
-开启 AddressSanitizer 检测内存错误：
+> **关键**：从 `demos/` 和 `solutions/` 下编译时，务必带上 `-I.`（源码所在目录），
+> 否则会报 `fatal error: utf8_console.h: No such file or directory`。
+
+开启 AddressSanitizer 检测内存错误（需安装带 ASan 的 MinGW，普通 WinLibs 包不带 `libasan`）：
 
 ```bash
-gcc -fsanitize=address -g demos/memory_model.c -o memory_asan.exe
+gcc -fsanitize=address -g -I. demos/memory_model.c -o memory_asan.exe
 ./memory_asan.exe
 ```
 
@@ -62,10 +74,12 @@ gcc -g grammar/05_pointer_advanced.c -o ptr.exe
 gdb ./ptr.exe
 ```
 
-多文件编译：
+多文件编译（同时需要根目录和子目录的头文件搜索路径）：
 
 ```bash
-gcc -Wall -std=c17 demos/multi_file/main.c demos/multi_file/util.c -o multi.exe
+gcc -Wall -Wextra -std=c17 -I. -Idemos/multi_file \
+    demos/multi_file/main.c demos/multi_file/util.c -o multi.exe
+./multi.exe
 ```
 
 ## 中文输出乱码说明
@@ -74,7 +88,7 @@ gcc -Wall -std=c17 demos/multi_file/main.c demos/multi_file/util.c -o multi.exe
 会把 UTF-8 字节按 GBK 解码，出现「鏁版嵁绫诲瀷澶у皬」这类乱码。
 
 **解决**：在 `main()` 开头调用 `init_utf8_console()`，把控制台代码页设为 65001(UTF-8)，
-等价于手动执行 `chp65001`，但对每个程序自动生效。非 Windows 平台为空实现，不影响编译。
+等价于手动执行 `chcp 65001`，但对每个程序自动生效。非 Windows 平台为空实现，不影响编译。
 
 ## 说明
 
