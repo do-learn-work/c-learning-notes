@@ -25,10 +25,22 @@
 #         （英文），不要把这里改回中文。
 # ============================================================
 
+# 用 := 而不是 ?= 的原因：CC / LDLIBS 是 GNU Make 的隐含变量，
+# make 自身已给 CC 赋值 cc；用 ?= 判定「已定义」为真，赋值会被静默忽略，
+# 结果编译器变成不存在的 cc。而命令行赋值（make CC=clang）本来就优先于
+# :=，所以用 := 既能固定默认值、又保留了命令行覆盖能力。两全其美。
 CC       := gcc
 CFLAGS   := -Wall -Wextra -std=c17
 INCLUDES := -I. -Idemos/multi_file
+# sqrt()(util.c) 与 fabs()(grammar/06) 需要数学库。
+# MinGW 与 glibc >= 2.34 已把数学函数并入默认库，加了无副作用；
+# 较老的 Linux 不加会链接失败。一律加上以保证可移植。
+LDLIBS   := -lm
 RM       := rm -f
+
+# 一旦配方失败就删除半成品目标。少了这句，编译被 Ctrl+C 中断时
+# 会留下时间戳比源码还新的残缺 .exe，下次 make 会误判「已最新」跳过它。
+.DELETE_ON_ERROR:
 
 # ---- 源文件（自动发现，新增文件无需改这里）----
 ROOT_SRC      := $(wildcard hello.c)
@@ -62,15 +74,15 @@ multi:     $(MULTI_BIN)
 
 # ---- 通用规则：单个 .c 编译为同目录同名 .exe ----
 %.exe: %.c utf8_console.h
-	$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) $< -o $@ $(LDLIBS)
 
 # ---- 例外：根目录的 hello.c 不依赖 utf8_console.h ----
 hello.exe: hello.c
-	$(CC) $(CFLAGS) $(INCLUDES) $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) $< -o $@ $(LDLIBS)
 
 # ---- 例外：多文件示例需同时编译 main.c 和 util.c ----
 $(MULTI_BIN): $(MULTI_SRC)
-	$(CC) $(CFLAGS) $(INCLUDES) $(MULTI_SRC) -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) $(MULTI_SRC) -o $@ $(LDLIBS)
 
 # ---- 清理 ----
 clean:
@@ -97,3 +109,8 @@ help:
 	@echo "  clean      Remove all generated .exe"
 	@echo "  list       List all source files"
 	@echo "  help       Show this message"
+	@echo ""
+	@echo "Variables (overridable):"
+	@echo "  make CC=clang        Use another compiler"
+	@echo "  make LDLIBS=' '      Do not link libm"
+	@echo "  make CFLAGS='-O2 -g' Replace the default warning/std flags"

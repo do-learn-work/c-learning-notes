@@ -63,6 +63,19 @@ make help       # 查看全部可用目标
 > **为什么 Makefile 的输出是英文**：Windows 版 GNU Make 会把 Makefile 内容按系统 ANSI 代码页（GBK）读取
 > 再转成 UTF-8 输出，含中文的**可执行行**会变成乱码。因此 `Makefile` 里注释写中文、但 `@echo` 输出用英文。
 
+命令行可覆盖变量，无需改文件：
+
+```bash
+make CC=clang           # 换编译器
+make LDLIBS=            # 不链接数学库
+make CFLAGS="-O2 -g"    # 替换默认的警告 / 标准参数
+```
+
+> **关于 `-lm`**：`demos/multi_file/util.c` 用了 `sqrt()`、`grammar/06` 用了 `fabs()`。
+> MinGW 与 glibc ≥ 2.34 已把数学函数并入默认库，加了无副作用；较老的 Linux 不加会链接失败，
+> 所以 Makefile 里统一加上 `LDLIBS := -lm` 保证可移植。
+> 注意这里用的是 `:=` 而非 `?=` —— `CC` 是 make 的隐含变量（默认值 `cc`），用 `?=` 会被静默忽略。
+
 `Makefile` 用 `wildcard` 自动发现源文件，新增 `.c` 文件无需改动；只有两处例外是显式写死的：
 `hello.c`（不依赖 `utf8_console.h`）和 `demos/multi_file`（`main.c` + `util.c` 合成一个 `multi.exe`）。
 
