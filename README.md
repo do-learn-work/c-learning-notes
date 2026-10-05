@@ -41,6 +41,33 @@
 
 ## 编译与运行
 
+### 方式一：用 make（推荐）
+
+根目录已提供 `Makefile`，自动发现所有源文件、统一处理 `-I.` 依赖，并支持增量编译。
+
+```bash
+make            # 编译全部 19 个程序
+make grammar    # 只编译 grammar/ 的 6 个语法专题
+make demos      # 只编译 demos/（含 multi_file 多文件示例）
+make solutions  # 只编译 solutions/ 的 7 个练习解答
+make multi      # 只编译 demos/multi_file 多文件示例
+make clean      # 删除所有生成的 .exe
+make list       # 列出所有源文件
+make help       # 查看全部可用目标
+```
+
+> **命令名提示**：WinLibs MinGW 按 MinGW 惯例把 make 命名为 `mingw32-make.exe`，没有 `make` 这个命令。
+> 已在 `~/.bashrc` 中加了条件 alias（`make` → `mingw32-make`），所以**交互式 Git Bash** 里直接写 `make` 即可；
+> 但 alias 只在交互式 shell 生效，在 **cmd / PowerShell / 非交互式 shell** 中请写 `mingw32-make`。
+
+> **为什么 Makefile 的输出是英文**：Windows 版 GNU Make 会把 Makefile 内容按系统 ANSI 代码页（GBK）读取
+> 再转成 UTF-8 输出，含中文的**可执行行**会变成乱码。因此 `Makefile` 里注释写中文、但 `@echo` 输出用英文。
+
+`Makefile` 用 `wildcard` 自动发现源文件，新增 `.c` 文件无需改动；只有两处例外是显式写死的：
+`hello.c`（不依赖 `utf8_console.h`）和 `demos/multi_file`（`main.c` + `util.c` 合成一个 `multi.exe`）。
+
+### 方式二：手动 gcc
+
 命令行编译（Windows Git Bash / PowerShell 均可，注意**始终带 `-I.`**）：
 
 ```bash
