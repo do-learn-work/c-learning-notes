@@ -1,0 +1,26 @@
+# ---- 编译产物（可重新编译，不入库）----
+*.exe
+*.o
+*.obj
+*.a
+*.dll
+*.out
+*.gdb
+build/
+bin/
+
+# ASan / 调试构建
+*_asan.exe
+*_gdb.exe
+*.gcda
+*.gcno
+
+# ---- 编辑器 / IDE 本地配置（含本机绝对路径）----
+.vscode/
+.idea/
+.vs/
+
+# ---- 系统文件 ----
+Thumbs.db
+desktop.ini
+.DS_Store
