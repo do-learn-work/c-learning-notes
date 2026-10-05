@@ -20,6 +20,9 @@ bin/
 .idea/
 .vs/
 
+# ---- 工具本地数据（不属于源码）----
+.workbuddy/
+
 # ---- 系统文件 ----
 Thumbs.db
 desktop.ini
